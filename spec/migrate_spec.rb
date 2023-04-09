@@ -56,10 +56,6 @@ RSpec.describe RBEMigrate::CLI do
     end
 
     context "when there are gems to migrate" do
-      let(:old_gems)     { %w[gem1 gem2 gem3 gem4] }
-      let(:current_gems) { %w[gem1      gem3     ] }
-      let(:result)       { %w[     gem2      gem4] }
-
       let(:install_command_double) { instance_double Gem::Commands::InstallCommand, execute: true }
 
       before :each do
@@ -68,15 +64,53 @@ RSpec.describe RBEMigrate::CLI do
         allow(Gem::Commands::InstallCommand).to receive(:new).and_return(install_command_double)
       end
 
-      it "passes the correct gems to RubyGems" do
-        expect(install_command_double).to receive(:handle_options).with(result)
-        cli.run
+      context "when some gems are already installed on the target version" do
+        let(:old_gems_names)     { %w[gem1 gem2 gem3 gem4] }
+        let(:current_gems_names) { %w[gem1      gem3     ] }
+        let(:result)             { %w[     gem2      gem4] }
+
+        %i[old_gems current_gems].each do |var|
+          let var do
+            send(:"#{var}_names").map do |name|
+              Gem::Specification.new do |gem|
+                gem.name = name
+                gem.version = "0.1"
+                gem.required_ruby_version = ">= #{OLD_VERSION}"
+              end
+            end
+          end
+        end
+
+        it "passes the correct gems to RubyGems" do
+          expect(install_command_double).to receive(:handle_options).with(result)
+          expect { cli.run }.not_to output(/skipping/).to_stdout
+        end
+      end
+
+      context "when an old gem is incompatible" do
+        let(:current_gems) { [] }
+        let :old_gems do
+          %w[gem1 gem2 gem3].each_with_index.map do |name, i|
+            Gem::Specification.new do |gem|
+              gem.name = name
+              gem.version = "0.1"
+              # First one tested will be skipped
+              gem.required_ruby_version = "#{i == 0 ? '~>' : '>='} #{OLD_VERSION}"
+            end
+          end
+        end
+        let(:result)             { %w[gem2 gem3] }
+
+        it "passes the correct gems to RubyGems" do
+          allow(install_command_double).to receive(:handle_options).with(result)
+          expect { cli.run }.to output(/skipping/).to_stderr
+        end
       end
     end
   end
 
   describe "#gemspecs_for" do
-    it "returns the names of the gemspecs for the specified version" do
+    it "returns the gemspecs for the specified version" do
       expect(cli.send(:gemspecs_for, OLD_VERSION)).to eq(%w[spec1 spec2])
     end
   end
