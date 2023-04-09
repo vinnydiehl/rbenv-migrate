@@ -46,6 +46,8 @@ RSpec.describe RBEMigrate::CLI do
   end
 
   describe "#run" do
+    before(:each) { expect(Optimist).not_to receive :educate }
+
     context "when there are no gems to migrate" do
       it "prints a message and exits" do
         allow(cli).to receive(:gemspecs_for).and_return([])
