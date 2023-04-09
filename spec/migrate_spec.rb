@@ -94,14 +94,20 @@ RSpec.describe RBEMigrate::CLI do
             Gem::Specification.new do |gem|
               gem.name = name
               gem.version = "0.1"
-              # First one tested will be skipped
+              # First one will be skipped
               gem.required_ruby_version = "#{i == 0 ? '~>' : '>='} #{OLD_VERSION}"
             end
           end
         end
-        let(:result)             { %w[gem2 gem3] }
+
+        let(:result) { %w[gem2 gem3] }
 
         it "passes the correct gems to RubyGems" do
+          expect(install_command_double).to receive(:handle_options).with(result)
+          cli.run
+        end
+
+        it "outputs that it is skipping that gem" do
           allow(install_command_double).to receive(:handle_options).with(result)
           expect { cli.run }.to output(/skipping/).to_stderr
         end
