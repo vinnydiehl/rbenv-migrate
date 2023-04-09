@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require "rbenv_migrate"
+
+RBEMigrate::CLI.new.run
