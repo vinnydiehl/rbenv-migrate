@@ -76,7 +76,6 @@ RSpec.describe RBEMigrate::CLI do
               Gem::Specification.new do |gem|
                 gem.name = name
                 gem.version = "0.1"
-                gem.required_ruby_version = ">= #{OLD_VERSION}"
               end
             end
           end
