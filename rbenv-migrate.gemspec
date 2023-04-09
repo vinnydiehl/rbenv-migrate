@@ -17,8 +17,6 @@ Gem::Specification.new do |gem|
   gem.test_files = Dir["spec/**/*"]
   gem.files = `git ls-files -z`.split "\x0"
 
-  gem.required_ruby_version = "~> 3.0"
-
   gem.add_dependency "optimist", "~> 3.0"
   gem.add_development_dependency "rake", "~> 13.0"
   gem.add_development_dependency "rspec", "~> 3.12"
