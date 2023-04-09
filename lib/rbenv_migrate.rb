@@ -15,9 +15,12 @@ module RBEMigrate
         educate_on_error
       end
 
-      Optimist::educate if ARGV.empty?
-
       @old_version = ARGV.first
+
+      if @old_version.nil? || @old_version == RUBY_VERSION ||
+         !Dir["#{ENV['RBENV_ROOT']}/versions/**"].map { |f| File.basename f }.include?(@old_version)
+        Optimist::educate
+      end
     end
 
     def run
