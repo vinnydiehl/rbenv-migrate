@@ -1,5 +1,4 @@
 require "spec_helper"
-require "stringio"
 
 # Arbitrary valid old version
 OLD_VERSION = "2.7.8"
